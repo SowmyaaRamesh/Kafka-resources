@@ -1,0 +1,17 @@
+//start zookeeper 2181- default port for zookeeper
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+
+//start kafka server
+.\bin\windows\kafka-server-start.bat .\config\server.properties
+
+// create topics 
+.\bin\windows\kafka-topics.bat --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic TestTopic
+
+//list topic
+.\bin\windows\kafka-topics.bat --list --zookeeper localhost:2181
+
+//add messages into topics, 9092 - default port for kafka bootstrap server 
+.\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic TestTopic
+
+//consumer - read 
+.\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic TestTopic --from-beginning
