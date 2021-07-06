@@ -1,8 +1,13 @@
 package com.example.kafka;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Scanner;
 
 public class SampleProducer {
@@ -20,46 +25,57 @@ public class SampleProducer {
         return extension;
     }
 
-    public static void csvReader(String filePath) throws IOException{
-        BufferedReader reader = null;
-        String line;
-        String[][] fileContents = new String[580][20];
-        int i=0,j=0;
-        int columnCount = 0;
+//    public static void csvReader(String filePath) throws IOException{
+//        BufferedReader reader = null;
+//        String line;
+//        String[][] fileContents = new String[580][20];
+//        int i=0,j=0;
+//        int columnCount = 0;
+//
+//        try{
+//            reader = new BufferedReader(new FileReader(filePath));
+//            while((line = reader.readLine())!=null){
+//                String[] row = line.split(",");
+//                for(String value:row){
+//                    fileContents[i][j++] = value;
+//                }
+//
+//                if(i==0){
+//                    columnCount = j;
+//                }
+//                i++;
+//                j=0;
+//            }
+////            System.out.printf("i,j:%d,%d\n",i,columnCount);
+//            for(int x=0;x<i;x++){
+//                for(int y=0;y<columnCount;y++){
+//                    System.out.printf("%-28s",fileContents[x][y]);
+//                }
+//                System.out.println();
+//            }
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }finally{
+//            reader.close();
+//        }
+//    }
 
-        try{
-            reader = new BufferedReader(new FileReader(filePath));
-            while((line = reader.readLine())!=null){
-                String[] row = line.split(",");
-                for(String value:row){
-                    fileContents[i][j++] = value;
-                }
+    public static void csvReader(String filePath) throws IOException {
 
-                if(i==0){
-                    columnCount = j;
-                }
-                i++;
-                j=0;
+        try (Reader reader = new FileReader(filePath);
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+            System.out.println("Year " + "\t\t" + "Brand Name " + "\t\t\t" + "Generic Name"+ "\t\t\t\t\t\t" +"Coverage Type" + "\t\t\t" + "Total Spending");
+            for (CSVRecord record : csvParser) {
+                String year = record.get("year");
+                String brandName = record.get("brand_name");
+                String genericName = record.get("generic_name");
+                String coverageType = record.get("coverage_type");
+                String totalSpending = record.get("total_spending");
+
+                System.out.printf("%-15s%-24s%-30s%-20s%-20s\n", year, brandName, genericName, coverageType, totalSpending );
             }
-//            System.out.printf("i,j:%d,%d\n",i,columnCount);
-            for(int x=0;x<i;x++){
-                for(int y=0;y<columnCount;y++){
-
-                    System.out.printf("%-28s",fileContents[x][y]);
-                }
-                System.out.println();
-            }
-
-        }catch(Exception e){
-            e.printStackTrace();
-
-        }finally{
-            reader.close();
 
         }
-
-
-
     }
 
     public static void main(String[] args) throws IOException {
