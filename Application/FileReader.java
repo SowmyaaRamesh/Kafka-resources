@@ -4,12 +4,20 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
+class ErrorLogger {
+    public static void writeLogToFile(String message){
+        try{
+            BufferedWriter out = new BufferedWriter(new FileWriter("log.txt", true));
+            out.write(message);
+            out.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+}
 public class SampleProducer {
     /**
      * Returns the extension of the file from the file path
@@ -63,10 +71,12 @@ public class SampleProducer {
 
     public static void validateBrandName(List<String> brandNameList){
         ListIterator<String> brandNameItr = brandNameList.listIterator();
+        com.example.kafka.ErrorLogger.writeLogToFile("Validating column: brand_name.\n");
 
         while(brandNameItr.hasNext()){
             if(brandNameItr.next().equals("")){
                 System.out.println("Error in row "+(brandNameItr.nextIndex()+1) + ": field should not be empty");
+                com.example.kafka.ErrorLogger.writeLogToFile("[Error in row "+(brandNameItr.nextIndex()+1) + "]: field should not be empty\n");
             }
         }
 
@@ -79,6 +89,7 @@ public class SampleProducer {
         try (Reader reader = new FileReader(filePath);
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
             System.out.println(csvParser.getHeaderNames());
+
             System.out.println("Year " + "\t\t" + "Brand Name " + "\t\t\t" + "Generic Name"+ "\t\t\t\t\t\t" +"Coverage Type" + "\t\t\t" + "Total Spending");
             for (CSVRecord record : csvParser) {
 //                System.out.print(csvParser.getCurrentLineNumber());
@@ -93,6 +104,7 @@ public class SampleProducer {
 //                System.out.printf("%-15s%-24s%-30s%-20s%-20s\n", year, brandName, genericName, coverageType, totalSpending );
             }
 //            System.out.println(brandNameList);
+            com.example.kafka.ErrorLogger.writeLogToFile("Successfully read csv file\n");
             validateBrandName(brandNameList);
 
             List<CSVRecord> records = new ArrayList<>();
@@ -111,11 +123,15 @@ public class SampleProducer {
 
         String extension= getFileExtension(filePath);
 //        System.out.println(extension);
+        com.example.kafka.ErrorLogger.writeLogToFile("Input file found to be of type:"+extension+"\n");
+
+
 
         switch(extension){
             case "csv": csvReader(filePath);
                 break;
             default: System.out.println("Invalid file type");
+                com.example.kafka.ErrorLogger.writeLogToFile("Invalid file type:"+extension+"\n");
         }
 
     }
