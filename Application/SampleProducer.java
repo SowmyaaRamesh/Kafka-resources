@@ -4,7 +4,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -27,34 +27,61 @@ class ErrorLogger {
 class ExcelWriter{
     static int rowid=0;
     public static void writeErrorDatatoExcel(Collection<String> errData) throws IOException{
-        // workbook object
-        XSSFWorkbook workbook = new XSSFWorkbook();
+        try{
+            FileInputStream inputStream = new FileInputStream(new File("ErrorData.xlsx"));
+            Workbook workbook = WorkbookFactory.create(inputStream);
 
-        // spreadsheet object
-        XSSFSheet spreadsheet
-                = workbook.createSheet(" Student Data ");
+            Sheet sheet = workbook.getSheetAt(0);
+            int rowId = sheet.getLastRowNum();
+            System.out.println("Rowid:"+rowId);
 
-        // creating a row object
-        XSSFRow row;
+            // writing the data into the sheets...
+            Row row = sheet.createRow(rowId);
+            rowid++;
 
-        // writing the data into the sheets...
-        row = spreadsheet.createRow(rowid);
-        rowid++;
+            int cellid = 0;
 
-        int cellid = 0;
+            for (Object obj : errData) {
+                Cell cell = row.createCell(cellid++);
+                cell.setCellValue((String)obj);
+            }
+            System.out.println("here");
+            inputStream.close();
+            FileOutputStream out = new FileOutputStream(
+                    new File("ErrorData.xlsx"),true);
+            workbook.write(out);
+            out.close();
 
-        for (Object obj : errData) {
-            Cell cell = row.createCell(cellid++);
-            cell.setCellValue((String)obj);
+        }catch(Exception e){
+            e.printStackTrace();
         }
 
-        FileOutputStream out = new FileOutputStream(
-                new File("ErrorData.xlsx"));
+//        // workbook object
+//        XSSFWorkbook workbook = new XSSFWorkbook();
+//
+//        // spreadsheet object
+//        XSSFSheet spreadsheet
+//                = workbook.createSheet(" Student Data ");
+//
+//        // creating a row object
+//        XSSFRow row;
 
-        workbook.write(out);
-        out.close();
+
+
+//        if(rowid == 1){
+//            FileOutputStream out = new FileOutputStream(
+//                    new File("ErrorData.xlsx"));
+//            workbook.write(out);
+//            out.close();
+//        } else{
+
+//        }
+
+
+
 
     }
+
 
 }
 
