@@ -122,14 +122,14 @@ public class SampleProducer {
     public static List<Integer> validateBrandName(List<String> brandNameList){
         ListIterator<String> brandNameItr = brandNameList.listIterator();
 
-        com.example.kafka.ErrorLogger.writeLogToFile("Validating column: brand_name.\n");
+        ErrorLogger.writeLogToFile("Validating column: brand_name.\n");
 
         List<Integer> errorIndexList = new ArrayList<>();
 
         while(brandNameItr.hasNext()){
             if(brandNameItr.next().equals("")){
                 errorIndexList.add((brandNameItr.nextIndex()-1));
-                com.example.kafka.ErrorLogger.writeLogToFile("[Error in row "+(brandNameItr.nextIndex()+1) + "]: field should not be empty\n");
+                ErrorLogger.writeLogToFile("[Error in row "+(brandNameItr.nextIndex()+1) + "]: field should not be empty\n");
             }
         }
 
@@ -155,6 +155,7 @@ public class SampleProducer {
             headerNames.add("brand_name");
             headerNames.add("generic_name");
             headerNames.add("coverage_type");
+            headerNames.add("row_number");
             headerNames.add("error_message");
 
             Object[] headerArray = headerNames.toArray();
@@ -167,7 +168,7 @@ public class SampleProducer {
                 String brandName = record.get("brand_name");
                 brandNameList.add(brandName);
             }
-            com.example.kafka.ErrorLogger.writeLogToFile("Successfully read csv file\n");
+            ErrorLogger.writeLogToFile("Successfully read csv file\n");
 
             errorIndices = validateBrandName(brandNameList);
 
@@ -199,8 +200,7 @@ public class SampleProducer {
 //                ArrayList<HealthData> errObjList = new ArrayList<>();
                 ArrayList<String> errObjList = new ArrayList<>();
 
-
-
+                String rowNo = String.valueOf(index+2);
                 String year = errRecord.get(0);
                 String brand = errRecord.get(1);
                 String generic = errRecord.get(2);
@@ -210,6 +210,7 @@ public class SampleProducer {
                 errObjList.add(brand);
                 errObjList.add(generic);
                 errObjList.add(coverage);
+                errObjList.add(rowNo);
                 errObjList.add(errorMessage);
 
 //                errObjList.add(new HealthData(year,brand,generic,coverage,errorMessage));
@@ -218,7 +219,7 @@ public class SampleProducer {
 
             }
             System.out.println(excelData);
-            com.example.kafka.ExcelWriter.writeErrorDataToExcel(excelData);
+            ExcelWriter.writeErrorDataToExcel(excelData);
 
 
         }
@@ -231,14 +232,14 @@ public class SampleProducer {
         String filePath = scanner.nextLine();
 
         String extension= getFileExtension(filePath);
-        com.example.kafka.ErrorLogger.writeLogToFile("Input file found to be of type:"+extension+"\n");
+        ErrorLogger.writeLogToFile("Input file found to be of type:"+extension+"\n");
 
 
         switch(extension){
             case "csv": csvReader(filePath);
-                break;
+                        break;
             default: System.out.println("Invalid file type");
-                com.example.kafka.ErrorLogger.writeLogToFile("Invalid file type:"+extension+"\n");
+                     ErrorLogger.writeLogToFile("Invalid file type:"+extension+"\n");
         }
 
     }
