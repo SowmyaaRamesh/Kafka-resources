@@ -13,28 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.*;
 import java.util.*;
 
-class HealthData{
-    public String year;
-    String brandName;
-    String genericName;
-    String coverageType;
-    String errorMessage;
-    public HealthData(String year,String brandName, String genericName, String coverageType, String errorMessage){
-        this.year = year;
-        this.brandName = brandName;
-        this.genericName = genericName;
-        this.coverageType = coverageType;
-        this.errorMessage = errorMessage;
-    }
-    public Object[] getDetails(){
-        ArrayList<String> details = new ArrayList<String>();
-        details.add(this.year);
-        details.add(this.brandName);
 
-        return details.toArray();
-
-    }
-}
 
 class ErrorLogger {
     public static void writeLogToFile(String message){
@@ -85,13 +64,7 @@ class ExcelWriter{
                 cell.setCellValue((String)obj);
             }
         }
-//        int cellid = 0;
-//
-//        for (Object obj : errData) {
-//            Cell cell = row.createCell(cellid++);
-//            cell.setCellValue((String)obj);
-//        }
-//        System.out.println("here");
+
 
         FileOutputStream out = new FileOutputStream(
                 new File("ErrorData.xlsx"));
@@ -161,7 +134,6 @@ public class SampleProducer {
             Object[] headerArray = headerNames.toArray();
 
 
-//            System.out.println(headerArray);
             excelData.put(String.valueOf(key++),headerArray);
 
             for (CSVRecord record : csvParser) {
@@ -196,8 +168,7 @@ public class SampleProducer {
                     continue;
                 }
                 CSVRecord errRecord = itr.next();
-//                System.out.println(errRecord);
-//                ArrayList<HealthData> errObjList = new ArrayList<>();
+
                 ArrayList<String> errObjList = new ArrayList<>();
 
                 String rowNo = String.valueOf(index+2);
@@ -213,12 +184,12 @@ public class SampleProducer {
                 errObjList.add(rowNo);
                 errObjList.add(errorMessage);
 
-//                errObjList.add(new HealthData(year,brand,generic,coverage,errorMessage));
-                System.out.println(errObjList);
+
+//                System.out.println(errObjList);
                 excelData.put(String.valueOf(key++),errObjList.toArray());
 
             }
-            System.out.println(excelData);
+
             ExcelWriter.writeErrorDataToExcel(excelData);
 
 
