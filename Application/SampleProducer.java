@@ -165,10 +165,9 @@ public class SampleProducer {
             int index;
 
 
-
-            while(indexItr.hasNext()){
+            while (indexItr.hasNext()) {
                 index = indexItr.next();
-                while (index!= itr.nextIndex() && itr.hasNext()){
+                while (index != itr.nextIndex() && itr.hasNext()) {
                     CSVRecord data = itr.next();
                     continue;
                 }
@@ -176,7 +175,7 @@ public class SampleProducer {
 
                 ArrayList<String> errObjList = new ArrayList<>();
 
-                String rowNo = String.valueOf(index+2);
+                String rowNo = String.valueOf(index + 2);
                 String year = errRecord.get(0);
                 String brand = errRecord.get(1);
                 String generic = errRecord.get(2);
@@ -191,29 +190,46 @@ public class SampleProducer {
 
 
 //                System.out.println(errObjList);
-                excelData.put(String.valueOf(key++),errObjList.toArray());
+                excelData.put(String.valueOf(key++), errObjList.toArray());
 
             }
 
             ExcelWriter.writeErrorDataToExcel(excelData);
+        }
+
+        try (Reader reader = new FileReader(filePath);
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
+            List<CSVRecord> records = csvParser.getRecords();
+
+            ListIterator<CSVRecord> itr = records.listIterator();
+
 
 //            Write validated productions to Kafka
+            System.out.println(errorIndices);
+
             ArrayList<CSVRecord> validatedRecordList = new ArrayList<CSVRecord>();
-            while(itr.hasNext()){
-                if(!errorIndices.contains(itr.nextIndex())){
+//            ArrayList<Integer>indices = new ArrayList<Integer>();
+            while (itr.hasNext()) {
+                if (!errorIndices.contains(itr.nextIndex())) {
+//                    indices.add(itr.nextIndex());
                     validatedRecordList.add(itr.next());
-
-
+                }else{
+                    itr.next();
                 }
+
             }
-            System.out.println(validatedRecordList);
+//            System.out.println(indices);
+//            System.out.println(validatedRecordList);
+
+
             final Logger logger = LoggerFactory.getLogger(Producer.class);
 
             // Create properties object for Producer
             Properties prop = new Properties();
-            prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"127.0.0.1:9092");
+            prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
             prop.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
+            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
 
             //Create the Producer
@@ -221,8 +237,9 @@ public class SampleProducer {
             Iterator<CSVRecord> validatedRecordListItr = validatedRecordList.iterator();
 
             for(int i=0;i<validatedRecordList.size();i++){
-                // Create the ProducerRecord
-                ProducerRecord<String,String> record = new ProducerRecord<String,String>("HealthData", validatedRecordListItr.next().toString() );
+//                 Create the ProducerRecord
+
+                ProducerRecord<String,String> record = new ProducerRecord<String,String>("Test",validatedRecordListItr.next().toString());
 
                 //Send Data - Asynchronous
 
@@ -242,6 +259,8 @@ public class SampleProducer {
                 });
 
 
+
+
             }
 
             //flush and close producer
@@ -249,9 +268,9 @@ public class SampleProducer {
             producer.close();
 
 
-
-
         }
+
+
     }
 
     public static void main(String[] args) throws IOException {
@@ -278,3 +297,4 @@ public class SampleProducer {
 //C:\\Users\\Sowmya\\Downloads\\health-data.csv
 
 
+0,5,8,12,15,23
