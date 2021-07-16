@@ -15,3 +15,7 @@
 
 //consumer - read 
 .\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic TestTopic --from-beginning
+
+
+//delete topics
+.\bin\windows\kafka-topics.bat --zookeeper localhost:2181 --delete --topic HealthData  
