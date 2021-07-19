@@ -1,0 +1,9 @@
+Input file found to be of type:csv
+Successfully read csv file
+Validating column: brand_name.
+[Error in row 2]: field should not be empty
+[Error in row 7]: field should not be empty
+[Error in row 10]: field should not be empty
+[Error in row 14]: field should not be empty
+[Error in row 17]: field should not be empty
+[Error in row 25]: field should not be empty
