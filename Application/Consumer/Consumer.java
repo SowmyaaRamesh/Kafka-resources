@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -8,10 +10,66 @@ import org.slf4j.LoggerFactory;
 
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
+
+
+    class HealthData {
+        private String year;
+        private String brandName;
+        private String genericName;
+        private String coverageType;
+        private String totalSpending;
+        private String sno;
+        public HealthData(){
+
+        }
+
+        public HealthData(String year, String brandName, String genericName, String coverageType, String totalSpending, String sno) {
+            this.year = year;
+            this.brandName = brandName;
+            this.genericName = genericName;
+            this.coverageType = coverageType;
+            this.totalSpending = totalSpending;
+            this.sno = sno;
+        }
+        public String getBrandName() {
+            return brandName;
+        }
+        public String getYear() {
+            return year;
+        }
+        public String getGenericName() {
+            return genericName;
+        }
+        public String getCoverageType(){
+            return coverageType;
+        }
+        public String getTotalSpending(){
+            return totalSpending;
+        }
+        public String getSno(){
+            return sno;
+        }
+
+
+    }
+
+
 public class Consumer {
+    public static HealthData convertJsonToHealthDataObj(String jsonRecord) {
+        ObjectMapper mapper = new ObjectMapper();
+        HealthData healthRecord = new HealthData();
+        try {
+            healthRecord= mapper.readValue(jsonRecord,HealthData.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return healthRecord;
+    }
     public static void main(String[] args){
         final Logger logger = LoggerFactory.getLogger(Consumer.class);
 
@@ -33,7 +91,7 @@ public class Consumer {
 
         //subscribe to topics
         consumer.subscribe(Arrays.asList("Test"));
-        String item;
+        HealthData item;
         SqlWriter.setUpDatabaseConnection();
 
         //poll and consume the Records
@@ -47,8 +105,17 @@ public class Consumer {
                         "Topic: "+record.topic()+", "+
                         "Partition: "+record.partition()+", "+
                         "Offset: "+record.offset()+"\n");
-                item = record.value().toString();
-                SqlWriter.writeToDb(item);
+                item = convertJsonToHealthDataObj(record.value().toString());
+                ArrayList<String> dbRecords = new ArrayList<String>();
+                dbRecords.add(item.getYear());
+                dbRecords.add(item.getBrandName());
+                dbRecords.add(item.getGenericName());
+                dbRecords.add(item.getCoverageType());
+                dbRecords.add(item.getTotalSpending());
+                dbRecords.add(item.getSno());
+//                System.out.println(dbRecords);
+
+                SqlWriter.writeToDb(dbRecords);
             }
 
         }

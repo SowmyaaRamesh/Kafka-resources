@@ -27,14 +27,16 @@ class HealthData {
     private String brandName;
     private String genericName;
     private String coverageType;
-    private Double totalSpending;
+    private String totalSpending;
+    private String sno;
 
-    public HealthData(String year, String brandName, String genericName, String coverageType, Double totalSpending) {
+    public HealthData(String year, String brandName, String genericName, String coverageType, String totalSpending, String sno) {
         this.year = year;
         this.brandName = brandName;
         this.genericName = genericName;
         this.coverageType = coverageType;
         this.totalSpending = totalSpending;
+        this.sno = sno;
     }
     public String getBrandName() {
         return brandName;
@@ -45,11 +47,14 @@ class HealthData {
     public String getGenericName() {
         return genericName;
     }
-    public String coverageType(){
+    public String getCoverageType(){
         return coverageType;
     }
-    public Double totalSpending(){
+    public String getTotalSpending(){
         return totalSpending;
+    }
+    public String getSno(){
+        return sno;
     }
 
 
@@ -275,21 +280,21 @@ public class SampleProducer {
 
             String jsonString="";
             for(CSVRecord record:validatedRecordList){
-                HealthData data = new HealthData(record.get("year"),record.get("brand_name"),record.get("generic_name"),record.get("coverage_type"),Double.parseDouble(record.get("total_spending")));
+                HealthData data = new HealthData(record.get("year"),record.get("brand_name"),record.get("generic_name"),record.get("coverage_type"),record.get("total_spending"),record.get("serialid"));
                 jsonString = convertCsvRecordToJsonString(data);
-                System.out.println(jsonString);
+
             }
 
 
 
-
+            System.out.println(jsonString);
             final Logger logger = LoggerFactory.getLogger(Producer.class);
 
             // Create properties object for Producer
             Properties prop = new Properties();
             prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
             prop.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
+            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
 
             //Create the Producer
@@ -319,19 +324,13 @@ public class SampleProducer {
                     }
                 });
 
-
-
-
 //            }
 
             //flush and close producer
             producer.flush(); //writes any pending data into the topic before closing
             producer.close();
 
-
         }
-
-
     }
 
     public static void main(String[] args) throws IOException {

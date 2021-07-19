@@ -3,6 +3,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 
@@ -40,48 +41,43 @@ public class SqlWriter{
         }
     }
 
-    public static void writeToDb(String item){
-        int i = item.lastIndexOf('[');
-        String valuesStr = item.substring(i+1);
-        valuesStr = valuesStr.substring(0,valuesStr.length()-2);
+    public static void writeToDb(ArrayList<String> valuesList){
 
-        String[] valuesList = valuesStr.split(", ");
+        String year = valuesList.get(0);
+        String brandName = valuesList.get(1);
+        String genericName = valuesList.get(2);
+        String coverageType = valuesList.get(3);
+        Double totalSpending = Double.parseDouble(valuesList.get(4));
+        int sno = Integer.parseInt(valuesList.get(5));
 
-        String year = valuesList[0];
-        String brandName = valuesList[1];
-        String genericName = valuesList[2];
-        String coverageType = valuesList[3];
-        Double totalSpending = Double.parseDouble(valuesList[4]);
-        int sno = Integer.parseInt(valuesList[18]);
-
-//        System.out.println(year+" "+brandName+" "+genericName+" "+coverageType+" "+totalSpending+" "+sno);
+        System.out.println(year+" "+brandName+" "+genericName+" "+coverageType+" "+totalSpending+" "+sno);
 
 
 
-        try {
-
-            PreparedStatement stmt=conn.prepareStatement("Insert into health_data values(?,?,?,?,?,?)");
-
-            stmt.setInt(1,sno);
-            stmt.setString(2,year);
-            stmt.setString(3,brandName);
-            stmt.setString(4,genericName);
-            stmt.setString(5,coverageType);
-            stmt.setDouble(6,totalSpending);
-
-
-            int result = stmt.executeUpdate();
-            if(result == 1){
-                System.out.println("Insertion successful.");
-            }
-
-
-
-        }catch(SQLException se) {
-            se.printStackTrace();
-        }catch(Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        }
+//        try {
+//
+//            PreparedStatement stmt=conn.prepareStatement("Insert into health_data values(?,?,?,?,?,?)");
+//
+//            stmt.setInt(1,sno);
+//            stmt.setString(2,year);
+//            stmt.setString(3,brandName);
+//            stmt.setString(4,genericName);
+//            stmt.setString(5,coverageType);
+//            stmt.setDouble(6,totalSpending);
+//
+//
+//            int result = stmt.executeUpdate();
+//            if(result == 1){
+//                System.out.println("Insertion successful.");
+//            }
+//
+//
+//
+//        }catch(SQLException se) {
+//            se.printStackTrace();
+//        }catch(Exception e) {
+//            //Handle errors for Class.forName
+//            e.printStackTrace();
+//        }
     }
 }
