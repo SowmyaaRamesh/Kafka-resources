@@ -1,5 +1,8 @@
 package com.example.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -19,6 +22,38 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+class HealthData {
+    private String year;
+    private String brandName;
+    private String genericName;
+    private String coverageType;
+    private Double totalSpending;
+
+    public HealthData(String year, String brandName, String genericName, String coverageType, Double totalSpending) {
+        this.year = year;
+        this.brandName = brandName;
+        this.genericName = genericName;
+        this.coverageType = coverageType;
+        this.totalSpending = totalSpending;
+    }
+    public String getBrandName() {
+        return brandName;
+    }
+    public String getYear() {
+        return year;
+    }
+    public String getGenericName() {
+        return genericName;
+    }
+    public String coverageType(){
+        return coverageType;
+    }
+    public Double totalSpending(){
+        return totalSpending;
+    }
+
+
+}
 
 class ErrorLogger {
     public static void writeLogToFile(String message){
@@ -114,6 +149,18 @@ public class SampleProducer {
         return errorIndexList;
 
     }
+    public static String convertCsvRecordToJsonString(HealthData record) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = "";
+
+        try {
+            jsonString = mapper.writeValueAsString(record);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return jsonString;
+    }
     public static void csvReader(String filePath) throws IOException {
 
         List<String> brandNameList = new ArrayList<>();
@@ -206,13 +253,12 @@ public class SampleProducer {
 
 
 //            Write validated productions to Kafka
-            System.out.println(errorIndices);
+
 
             ArrayList<CSVRecord> validatedRecordList = new ArrayList<CSVRecord>();
-//            ArrayList<Integer>indices = new ArrayList<Integer>();
+
             while (itr.hasNext()) {
                 if (!errorIndices.contains(itr.nextIndex())) {
-//                    indices.add(itr.nextIndex());
                     validatedRecordList.add(itr.next());
                 }else{
                     itr.next();
@@ -221,6 +267,20 @@ public class SampleProducer {
             }
 //            System.out.println(indices);
 //            System.out.println(validatedRecordList);
+//            Iterator<CSVRecord> validatedRecordListItr = validatedRecordList.iterator();
+//            while(validatedRecordListItr.hasNext()){
+//                String jsonString = convertCsvRecordToJsonString(validatedRecordListItr.next());
+//                System.out.println(jsonString);
+//            }
+
+            String jsonString="";
+            for(CSVRecord record:validatedRecordList){
+                HealthData data = new HealthData(record.get("year"),record.get("brand_name"),record.get("generic_name"),record.get("coverage_type"),Double.parseDouble(record.get("total_spending")));
+                jsonString = convertCsvRecordToJsonString(data);
+                System.out.println(jsonString);
+            }
+
+
 
 
             final Logger logger = LoggerFactory.getLogger(Producer.class);
@@ -229,17 +289,18 @@ public class SampleProducer {
             Properties prop = new Properties();
             prop.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
             prop.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+            prop.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
 
 
             //Create the Producer
             final KafkaProducer<String, String> producer = new KafkaProducer<>(prop);
             Iterator<CSVRecord> validatedRecordListItr = validatedRecordList.iterator();
 
-            for(int i=0;i<validatedRecordList.size();i++){
-//                 Create the ProducerRecord
+//            for(int i=0;i<3;i++){
+////                 Create the ProducerRecord
 
-                ProducerRecord<String,String> record = new ProducerRecord<String,String>("Test",validatedRecordListItr.next().toString());
+
+                ProducerRecord<String,String> record = new ProducerRecord<String,String>("Test",jsonString);
 
                 //Send Data - Asynchronous
 
@@ -261,7 +322,7 @@ public class SampleProducer {
 
 
 
-            }
+//            }
 
             //flush and close producer
             producer.flush(); //writes any pending data into the topic before closing
@@ -297,4 +358,3 @@ public class SampleProducer {
 //C:\\Users\\Sowmya\\Downloads\\health-data.csv
 
 
-0,5,8,12,15,23
